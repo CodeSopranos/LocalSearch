@@ -2,7 +2,7 @@ import numpy as np
 from algorithm.base import Algorithm
 from itertools import combinations
 from utils import tools
-from tqdm import tqdm
+from tqdm import tqdm_notebook
 import copy
 
 
@@ -13,7 +13,8 @@ class LocalSearch(Algorithm):
         self.dist = problem['distances']
         self.flow = problem['flows']
         self.problem = problem
-        pass
+        self.methods = ['first-improvement',
+                        'best-improvement']
 
 
     @property
@@ -22,35 +23,75 @@ class LocalSearch(Algorithm):
 
 
     def set_params(self, params):
-        self.solution = params['solution']
+        self.solution = copy.copy(params['solution'])
+        self.method   = params['method']
+        self.cur_cost = tools.compute_solution(self.problem, self.solution)
         self.n_iter   = params['n_iter']
-        self.patience = params['patience']
 
 
     def solve(self):
+        if self.method == self.methods[0]:
+            return self.first_improvement()
+        elif self.method == self.methods[1]:
+            return self.best_improvement()
+        else:
+            print('Method must be one of {}'.format(self.methods))
 
-        cur_cost = tools.compute_solution(self.problem, self.solution)
-        print('Start cost {}'.format(cur_cost))
 
-        indexes = np.arange(self.n)
-        for i in tqdm(range(self.n_iter), total=self.n_iter):
-            comb = list(combinations(indexes, 2))
-            flag = False
-            for c in comb:
-                c = list(c)
-                tmp_solution = copy.copy(self.solution)
-                tmp_solution[c] = tmp_solution[c][::-1]
+    def first_improvement(self):
+
+        print('Start cost {}'.format(self.cur_cost))
+
+        comb = list(combinations(np.arange(self.n), 2))
+        dont_look  = {x:np.zeros(self.n) for x in range(self.n)}
+        for i in tqdm(range(self.n_iter),  position=0):
+
+            flag = True
+            for opt in comb:
+                if (sum(dont_look[opt[0]]) >= 19 or
+                    sum(dont_look[opt[1]]) >= 19):
+                   continue
+                opt = list(opt)
+                tmp_solution      = copy.copy(self.solution)
+                tmp_solution[opt] = tmp_solution[opt][::-1]
                 cost = tools.compute_solution(self.problem, tmp_solution)
-                if cost < cur_cost:
-                    cur_cost = cost
+                if cost < self.cur_cost:
+                    self.cur_cost = cost
                     self.solution = tmp_solution
-                    flag = True
+                    flag = False
                     break
-            if not flag:
-                self.patience -= 1
-                flag = False
-            if self.patience == 0:
-                print('patience is over!')
+                dont_look[opt[0]][opt[1]] = 1
+                dont_look[opt[1]][opt[0]] = 1
+            if flag:
+                print('No better solutions, stoping...')
+                break
+
+        end_cost = tools.compute_solution(self.problem, self.solution)
+        print('End cost {}'.format(end_cost))
+        return self.solution
+
+
+    def best_improvement(self):
+
+        print('Start cost {}'.format(self.cur_cost))
+
+        dont_look = np.zeros(self.n)
+        comb = list(combinations(np.arange(self.n), 2))
+        for i in tqdm(range(self.n_iter), position=0):
+
+            best_opt = None
+            for opt in comb:
+                opt = list(opt)
+                tmp_solution      = copy.copy(self.solution)
+                tmp_solution[opt] = tmp_solution[opt][::-1]
+                cost = tools.compute_solution(self.problem, tmp_solution)
+                if cost < self.cur_cost:
+                    self.cur_cost = cost
+                    best_opt      = opt
+            if best_opt:
+                self.solution[best_opt] = self.solution[best_opt][::-1]
+            else:
+                print('No better solutions, stoping...')
                 break
         end_cost = tools.compute_solution(self.problem, self.solution)
         print('End cost {}'.format(end_cost))
