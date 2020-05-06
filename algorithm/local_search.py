@@ -69,7 +69,7 @@ class LocalSearch(Algorithm):
         end_cost = tools.compute_solution(self.problem, self.solution)
         if self.verbose:
             print('End cost {}'.format(end_cost))
-        return self.solution, end_cost
+        return self.solution
 
 
     def best_improvement(self):
@@ -99,4 +99,4 @@ class LocalSearch(Algorithm):
         if self.verbose:
             print('End cost {}'.format(end_cost))
 
-        return self.solution, end_cost
+        return self.solution

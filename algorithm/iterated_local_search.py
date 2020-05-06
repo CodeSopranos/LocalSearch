@@ -47,8 +47,8 @@ class Iterated(Algorithm):
     def LocalSearchSolver(self):
         alg = local_search.LocalSearch(self.problem)
         alg.set_params(self.params)
-        local_search_solve, cost = alg.solve()
-        return local_search_solve, cost
+        local_search_solve = alg.solve()
+        return local_search_solve, alg.cur_cost
         
     def solve(self):
         #generate initial solution
@@ -57,7 +57,7 @@ class Iterated(Algorithm):
         self.solution = solution
         self.refresh_params()
         
-        self.solution, best_cost = self.LocalSearchSolver()
+        self.solution, self.cur_cost = self.LocalSearchSolver()
         if self.verbose:
             print('Start cost: ', best_cost)
         for i in tqdm(range(self.n_iter),  position=0, disable=not self.verbose):
@@ -66,8 +66,8 @@ class Iterated(Algorithm):
             self.refresh_params()
             local_search_solve, cost = self.LocalSearchSolver()
 
-            if cost < best_cost:
-                best_cost = cost
+            if cost < self.cur_cost:
+                self.cur_cost = cost
                 self.solution = copy.copy(local_search_solve)
 
                 self.k_bounds['curr']+=1
@@ -77,6 +77,6 @@ class Iterated(Algorithm):
                 self.k_bounds['curr'] = self.k_bounds['min']
         
         if self.verbose:
-            print('End cost: ', best_cost)
-        return local_search_solve, best_cost
+            print('End cost: ', self.cur_cost)
+        return local_search_solve
         
