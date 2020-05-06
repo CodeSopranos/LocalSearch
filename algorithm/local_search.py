@@ -19,15 +19,14 @@ class LocalSearch(Algorithm):
 
     @property
     def name(self):
-        return 'BruteForce'
-
+        return 'LocalSearch'
 
     def set_params(self, params):
         self.solution = copy.copy(params['solution'])
         self.method   = params['method']
         self.cur_cost = tools.compute_solution(self.problem, self.solution)
         self.n_iter   = params['n_iter']
-
+        self.verbose  = params['verbose']
 
     def solve(self):
         if self.method == self.methods[0]:
@@ -39,12 +38,13 @@ class LocalSearch(Algorithm):
 
 
     def first_improvement(self):
-
-        print('Start cost {}'.format(self.cur_cost))
+        
+        if self.verbose:
+            print('Start cost {}'.format(self.cur_cost))
 
         comb = list(combinations(np.arange(self.n), 2))
         dont_look  = {x:np.zeros(self.n) for x in range(self.n)}
-        for i in tqdm(range(self.n_iter),  position=0):
+        for i in tqdm(range(self.n_iter),  position=0, disable=not self.verbose):
 
             flag = True
             for opt in comb:
@@ -62,22 +62,23 @@ class LocalSearch(Algorithm):
                     break
                 dont_look[opt[0]][opt[1]] = 1
                 dont_look[opt[1]][opt[0]] = 1
-            if flag:
+            if flag and self.verbose:
                 print('No better solutions, stoping...')
                 break
 
         end_cost = tools.compute_solution(self.problem, self.solution)
-        print('End cost {}'.format(end_cost))
+        if self.verbose:
+            print('End cost {}'.format(end_cost))
         return self.solution
 
 
     def best_improvement(self):
-
-        print('Start cost {}'.format(self.cur_cost))
+        if self.verbose:
+            print('Start cost {}'.format(self.cur_cost))
 
         dont_look = np.zeros(self.n)
         comb = list(combinations(np.arange(self.n), 2))
-        for i in tqdm(range(self.n_iter), position=0):
+        for i in tqdm(range(self.n_iter), position=0, disable=not self.verbose):
 
             best_opt = None
             for opt in comb:
@@ -94,5 +95,8 @@ class LocalSearch(Algorithm):
                 print('No better solutions, stoping...')
                 break
         end_cost = tools.compute_solution(self.problem, self.solution)
-        print('End cost {}'.format(end_cost))
+        
+        if self.verbose:
+            print('End cost {}'.format(end_cost))
+
         return self.solution
