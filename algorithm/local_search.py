@@ -2,7 +2,7 @@ import numpy as np
 from algorithm.base import Algorithm
 from itertools import combinations
 from utils import tools
-from tqdm import tqdm_notebook
+from tqdm import tqdm, tqdm_notebook
 import copy
 
 
@@ -50,7 +50,7 @@ class LocalSearch(Algorithm):
             for opt in comb:
                 if (sum(dont_look[opt[0]]) >= 19 or
                     sum(dont_look[opt[1]]) >= 19):
-                   continue
+                    continue
                 opt = list(opt)
                 tmp_solution      = copy.copy(self.solution)
                 tmp_solution[opt] = tmp_solution[opt][::-1]
