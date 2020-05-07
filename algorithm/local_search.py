@@ -10,7 +10,7 @@ class LocalSearch(Algorithm):
 
     def __init__(self, problem):
         self.n = problem['n']
-        self.dist = problem['distances']
+        self.dist = problem['dists']
         self.flow = problem['flows']
         self.problem = problem
         self.methods = ['first-improvement',
@@ -21,12 +21,14 @@ class LocalSearch(Algorithm):
     def name(self):
         return 'LocalSearch'
 
+
     def set_params(self, params):
         self.solution = copy.copy(params['solution'])
         self.method   = params['method']
         self.cur_cost = tools.compute_solution(self.problem, self.solution)
         self.n_iter   = params['n_iter']
         self.verbose  = params['verbose']
+
 
     def solve(self):
         if self.method == self.methods[0]:
@@ -38,13 +40,15 @@ class LocalSearch(Algorithm):
 
 
     def first_improvement(self):
-        
+
         if self.verbose:
             print('Start cost {}'.format(self.cur_cost))
 
         comb = list(combinations(np.arange(self.n), 2))
         dont_look  = {x:np.zeros(self.n) for x in range(self.n)}
-        for i in tqdm(range(self.n_iter),  position=0, disable=not self.verbose):
+        for i in tqdm(range(self.n_iter),
+                      position=0,
+                      disable=not self.verbose):
 
             flag = True
             for opt in comb:
@@ -95,7 +99,7 @@ class LocalSearch(Algorithm):
                 print('No better solutions, stoping...')
                 break
         end_cost = tools.compute_solution(self.problem, self.solution)
-        
+
         if self.verbose:
             print('End cost {}'.format(end_cost))
 
