@@ -17,18 +17,28 @@ class LocalSearch(Algorithm):
         self.methods = ['first-improvement',
                         'best-improvement',
                         'stochastic-2opt']
-
+        self.cost_func   = self.simple_cost
+        self.cost_params = None
 
     @property
     def name(self):
         return 'LocalSearch'
 
+    @staticmethod
+    def simple_cost(problem, solution, params):
+        return tools.compute_solution(problem, solution)
+
     def set_params(self, params):
         self.solution = copy.copy(params['solution'])
         self.method   = params['method']
-        self.cur_cost = tools.compute_solution(self.problem, self.solution)
+        self.cur_cost = self.cost_func(self.problem, self.solution, self.cost_params)
         self.n_iter   = params['n_iter']
         self.verbose  = params['verbose']
+
+
+    def set_cost_func(self, cost_function, param):
+        self.cost_func   = cost_function
+        self.cost_params = param
 
 
     def solve(self):
@@ -47,8 +57,8 @@ class LocalSearch(Algorithm):
         if self.verbose:
             print('Start cost {}'.format(self.cur_cost))
 
-        comb = list(combinations(np.arange(self.n), 2))
-        dont_look  = {x:np.zeros(self.n) for x in range(self.n)}
+        comb       = list(combinations(np.arange(self.n, dtype=np.int32), 2))
+        dont_look  = {x:np.zeros(self.n, dtype=np.int32) for x in range(self.n)}
         for i in tqdm(range(self.n_iter),
                       position=0,
                       disable=not self.verbose):
@@ -61,7 +71,7 @@ class LocalSearch(Algorithm):
                 opt = list(opt)
                 tmp_solution      = copy.copy(self.solution)
                 tmp_solution[opt] = tmp_solution[opt][::-1]
-                cost = tools.compute_solution(self.problem, tmp_solution)
+                cost = self.cost_func(self.problem, tmp_solution, self.cost_params)
                 if cost < self.cur_cost:
                     self.cur_cost = cost
                     self.solution = tmp_solution
@@ -73,10 +83,11 @@ class LocalSearch(Algorithm):
                 print('No better solutions, stoping...')
                 break
 
-        end_cost = tools.compute_solution(self.problem, self.solution)
+        end_cost = self.cost_func(self.problem, self.solution, self.cost_params)
         if self.verbose:
             print('End cost {}'.format(end_cost))
         return self.solution
+
 
     def stochastic_2opt(self):
         if self.verbose:
@@ -89,7 +100,7 @@ class LocalSearch(Algorithm):
 
                 tmp_solution      = copy.copy(self.solution)
                 tmp_solution[ind_left:ind_right] = tmp_solution[ind_left:ind_right][::-1]
-                cost = tools.compute_solution(self.problem, tmp_solution)
+                cost = self.cost_func(self.problem, tmp_solution, self.cost_params)
                 if cost < self.cur_cost:
                     self.cur_cost = cost
                     self.solution = tmp_solution
@@ -99,10 +110,11 @@ class LocalSearch(Algorithm):
                 print('No better solutions, stoping...')
                 break
 
-        end_cost = tools.compute_solution(self.problem, self.solution)
+        end_cost = self.cost_func(self.problem, self.solution, self.cost_params)
         if self.verbose:
             print('End cost {}'.format(end_cost))
         return self.solution
+
 
     def best_improvement(self):
         if self.verbose:
@@ -117,7 +129,7 @@ class LocalSearch(Algorithm):
                 opt = list(opt)
                 tmp_solution      = copy.copy(self.solution)
                 tmp_solution[opt] = tmp_solution[opt][::-1]
-                cost = tools.compute_solution(self.problem, tmp_solution)
+                cost = self.cost_func(self.problem, tmp_solution, self.cost_params)
                 if cost < self.cur_cost:
                     self.cur_cost = cost
                     best_opt      = opt
@@ -126,7 +138,7 @@ class LocalSearch(Algorithm):
             else:
                 print('No better solutions, stoping...')
                 break
-        end_cost = tools.compute_solution(self.problem, self.solution)
+        end_cost = self.cost_func(self.problem, self.solution, self.cost_params)
 
         if self.verbose:
             print('End cost {}'.format(end_cost))

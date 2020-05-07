@@ -1,6 +1,7 @@
 import copy
 import random
 import numpy as np
+import matplotlib.pyplot as plt
 from tqdm import tqdm, tqdm_notebook
 from algorithm.base import Algorithm
 from itertools import combinations
@@ -15,6 +16,7 @@ class Iterated(Algorithm):
         self.dist = problem['dists']
         self.flow = problem['flows']
         self.problem = problem
+        self.history = []
 
     @property
     def name(self):
@@ -25,6 +27,7 @@ class Iterated(Algorithm):
         self.solution  = copy.copy(params['solution'])
         self.method    = params['method']
         self.cur_cost  = tools.compute_solution(self.problem, self.solution)
+        self.history.append(self.cur_cost)
         self.n_iter    = params['n_iter']
         self.n_iter_ls = params['n_iter_ls']
         self.verbose   = params['verbose']
@@ -59,6 +62,7 @@ class Iterated(Algorithm):
             print('Start cost: {}'.format(self.cur_cost))
 
         self.solution, self.cur_cost = self.LocalSearchSolver()
+        self.last_state = 0
         for i in tqdm(range(self.n_iter),
                       position=0,
                       disable=not self.verbose):
@@ -66,12 +70,13 @@ class Iterated(Algorithm):
             self.perturbation()
             self.refresh_params()
             local_search_solve, cost = self.LocalSearchSolver()
-
+            self.history.append(cost)
             if cost < self.cur_cost:
                 self.cur_cost = cost
                 self.solution = copy.copy(local_search_solve)
+                self.last_state = i
 
-                self.k_bounds['curr']+=1
+                self.k_bounds['curr'] += 1
                 if self.k_bounds['curr'] == self.k_bounds['max']:
                     self.k_bounds['curr'] = self.k_bounds['min']
             else:
@@ -80,4 +85,17 @@ class Iterated(Algorithm):
         if self.verbose:
             print('End cost: {}'.format(self.cur_cost))
 
-        return local_search_solve
+        return self.solution
+
+
+    def get_history(self):
+        plt.figure(figsize=(10, 4))
+        plt.plot(self.history, label='cost_function')
+        plt.plot(self.last_state+1,
+                 self.history[self.last_state+1],
+                 'o', label='chosen optimum')
+        plt.grid()
+        plt.legend()
+        plt.title(self.name)
+        plt.show()
+        return self.history
