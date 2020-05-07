@@ -55,6 +55,8 @@ class Iterated(Algorithm):
         return local_search_solve, alg.cur_cost
 
     def solve(self):
+        if self.verbose:
+            print('Start cost: {}'.format(self.cur_cost))
 
         self.solution, self.cur_cost = self.LocalSearchSolver()
         for i in tqdm(range(self.n_iter),
