@@ -7,4 +7,4 @@ The research work on **local search** algorithms solving *Quadratic Assignment P
  - [GUIDED LOCAL SEARCH](https://www.bracil.net/CSP/papers/VTA-GLS-Handbook2010.pdf) and [here](https://www.researchgate.net/publication/220462500_Applying_an_Extended_Guided_Local_Search_to_the_Quadratic_Assignment_Problem#fullTextFileContent)
 
 *best known results for tai benchmarks:*
-- [Page 6. TABLE IX](https://ink.library.smu.edu.sg/cgi/viewcontent.cgi?article=3668&context=sis_research)
+- [see Page 6. TABLE IX](https://ink.library.smu.edu.sg/cgi/viewcontent.cgi?article=3668&context=sis_research)
