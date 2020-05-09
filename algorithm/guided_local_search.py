@@ -52,14 +52,11 @@ class Guided(Algorithm):
             cost = tools.compute_solution(self.problem, tmp_solution)
             self.history.append(cost)
             if self.cur_cost > cost:
-                # print('less')
                 self.solution = tmp_solution
                 self.cur_cost = cost
                 self.last_state = epoch
                 unimprove_counter = 0
             else:
-                # self.solution = tmp_solution
-                # self.cur_cost = cost
                 no_improve_counter += 1
             self.update_penalty()
             self.refresh_params()
@@ -78,19 +75,13 @@ class Guided(Algorithm):
         self.utility = np.zeros((self.n, self.n), dtype=np.float32)
         for i in range(self.n):
             for j in range(self.n):
-                # dist = self.dist[self.solution[i]][self.solution[j]]
                 dist = self.dist[i][self.solution[i]]
                 flow = self.flow[i][j]
                 c    = dist * flow
-                # self.utility[self.solution[i]][self.solution[j]] = \
-                #         c / (1 + self.penalty[self.solution[i]][self.solution[j]])
                 self.utility[i][self.solution[i]] = \
                         c / (1 + self.penalty[i][self.solution[i]])
         maximized = self.utility.max()
         for i in range(self.n):
-            # for j in range(self.n):
-            #     if self.utility[self.solution[i]][self.solution[j]] == maximized:
-            #         self.penalty[self.solution[i]][self.solution[j]] += 1
             if self.utility[i][self.solution[i]] == maximized:
                 self.penalty[i][self.solution[i]] += 1
 
@@ -101,13 +92,9 @@ class Guided(Algorithm):
         mu      = params['mu']
         n       = params['n']
         total_penalty = 0
-        # for i in range(n):
-        #     for j in range(n):
-        #         total_penalty += penalty[solution[i]][solution[j]]
         for i in range(n):
             total_penalty += penalty[i][solution[i]]
         _lambda = cost / n
-        # print( mu * _lambda )
         return cost + mu * _lambda * total_penalty
 
 
@@ -139,5 +126,4 @@ class Guided(Algorithm):
         plt.grid()
         plt.legend()
         plt.title(self.name)
-        # plt.show()
         return self.history
