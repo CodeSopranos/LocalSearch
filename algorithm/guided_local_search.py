@@ -45,8 +45,9 @@ class Guided(Algorithm):
         self.last_state = 0
         no_improve_counter = 0
         for epoch in tqdm(range(self.n_epoch),
-                          position=0,
-                          disable=not self.verbose):
+                                   position=0,
+                                   total=self.n_epoch,
+                                   disable=not self.verbose):
             tmp_solution, h = self.LocalSearchSolver(self.augmented_cost)
             cost = tools.compute_solution(self.problem, tmp_solution)
             self.history.append(cost)
@@ -138,5 +139,5 @@ class Guided(Algorithm):
         plt.grid()
         plt.legend()
         plt.title(self.name)
-        plt.show()
+        # plt.show()
         return self.history

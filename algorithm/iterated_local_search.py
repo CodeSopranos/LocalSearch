@@ -63,10 +63,10 @@ class Iterated(Algorithm):
 
         self.solution, self.cur_cost = self.LocalSearchSolver()
         self.last_state = 0
-        for i in tqdm(range(self.n_iter),
-                      position=0,
-                      disable=not self.verbose):
-
+        self.best_solution = self.solution
+        for i in tqdm_notebook(range(self.n_iter),
+                               position=0,
+                               disable=not self.verbose):
             self.perturbation()
             self.refresh_params()
             local_search_solve, cost = self.LocalSearchSolver()
@@ -74,6 +74,7 @@ class Iterated(Algorithm):
             if cost < self.cur_cost:
                 self.cur_cost = cost
                 self.solution = copy.copy(local_search_solve)
+                self.best_solution = copy.copy(local_search_solve)
                 self.last_state = i
 
                 self.k_bounds['curr'] += 1
@@ -84,7 +85,7 @@ class Iterated(Algorithm):
 
         if self.verbose:
             print('End cost: {}'.format(self.cur_cost))
-
+        self.solution = self.best_solution
         return self.solution
 
 
@@ -97,5 +98,5 @@ class Iterated(Algorithm):
         plt.grid()
         plt.legend()
         plt.title(self.name)
-        plt.show()
+        # plt.show()
         return self.history
